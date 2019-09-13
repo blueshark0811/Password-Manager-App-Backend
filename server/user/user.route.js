@@ -5,8 +5,6 @@ const userCtrl = require('./user.controller');
 
 const router = express.Router(); // eslint-disable-line new-cap
 
-router.route('/account-type')
-  .get(userCtrl.get_account_list)
 router.route('/')
   /** GET /api/users - Get list of users */
   .get(userCtrl.list)
@@ -19,7 +17,7 @@ router.route('/:userId')
   .get(userCtrl.get)
 
   /** PUT /api/users/:userId - Update user */
-  .put(userCtrl.update)
+  .put(validate(paramValidation.updateUser), userCtrl.update)
 
   /** DELETE /api/users/:userId - Delete user */
   .delete(userCtrl.remove);

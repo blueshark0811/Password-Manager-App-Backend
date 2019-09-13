@@ -1,21 +1,11 @@
 const User = require('./user.model');
-const AccountType = require('./accounttype.model');
 
-
-
-function get_account_list(req, res, next) {
-  AccountType.find({ })
-    .then(typelist => res.json(typelist))
-    .catch(e => next(e));
-}
 /**
  * Load user and append to req.
  */
 function load(req, res, next, id) {
-  User.find({username: id})
+  User.get(id)
     .then((user) => {
-      // delete user['_id']
-      console.log(user)
       req.user = user; // eslint-disable-line no-param-reassign
       return next();
     })
@@ -37,21 +27,14 @@ function get(req, res) {
  * @returns {User}
  */
 function create(req, res, next) {
-
-  // if(req.body.username == 'admin' || req.body.username == 'mattvisk')
-  //   role = 'admin';
-  // else
-  //   role = 'user';
   const user = new User({
     username: req.body.username,
-    email: req.body.email,
-    password: req.body.password,
-    role: 'user'
+    mobileNumber: req.body.mobileNumber
   });
 
   user.save()
-      .then(savedUser => res.json(savedUser))
-      .catch(e => next(e));
+    .then(savedUser => res.json(savedUser))
+    .catch(e => next(e));
 }
 
 /**
@@ -61,11 +44,10 @@ function create(req, res, next) {
  * @returns {User}
  */
 function update(req, res, next) {
-  const user = req.user[0];
+  const user = req.user;
   user.username = req.body.username;
-  user.password = req.body.password;
-  user.email = req.body.email;
-  console.log(user)
+  user.mobileNumber = req.body.mobileNumber;
+
   user.save()
     .then(savedUser => res.json(savedUser))
     .catch(e => next(e));
@@ -79,7 +61,7 @@ function update(req, res, next) {
  */
 function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
-  User.list({ limit, skip, status: true})
+  User.list({ limit, skip })
     .then(users => res.json(users))
     .catch(e => next(e));
 }
@@ -89,11 +71,10 @@ function list(req, res, next) {
  * @returns {User}
  */
 function remove(req, res, next) {
-  const user = req.user[0];
-  user.status = false;
-  user.save()
+  const user = req.user;
+  user.remove()
     .then(deletedUser => res.json(deletedUser))
     .catch(e => next(e));
 }
 
-module.exports = { load, get, get_account_list, create, update, list, remove };
+module.exports = { load, get, create, update, list, remove };

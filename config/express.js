@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const compress = require('compression');
 const methodOverride = require('method-override');
 const cors = require('cors');
-const path  = require('path');
 const httpStatus = require('http-status');
 const expressWinston = require('express-winston');
 const expressValidation = require('express-validation');
@@ -16,18 +15,10 @@ const config = require('./config');
 const APIError = require('../server/helpers/APIError');
 
 const app = express();
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
 if (config.env === 'development') {
   app.use(logger('dev'));
 }
-
-app.use(express.static(path.resolve('/home/ubuntu/bikemail/bikemail/build')));
-// app.use(express.static(path.resolve('/d/projects/bikemail/bikemail-frontend/build')));
-
-app.use(bodyParser.text());
 
 // parse body params and attache them to req.body
 app.use(bodyParser.json());
@@ -55,16 +46,9 @@ if (config.env === 'development') {
   }));
 }
 
-//if (process.env.NODE_ENV == 'production') {
-  
-//}
 // mount all routes on /api path
 app.use('/api', routes);
 
-app.use('/*', (req, res) => {
-//    res.sendFile(path.resolve('/d/projects/bikemail/bikemail-frontend/build', 'index.html'));
-    res.sendFile(path.resolve('/home/ubuntu/bikemail/bikemail/build', 'index.html'));
-})
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
   if (err instanceof expressValidation.ValidationError) {

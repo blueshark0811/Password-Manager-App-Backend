@@ -9,40 +9,17 @@ const APIError = require('../helpers/APIError');
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
+    required: true
+  },
+  mobileNumber: {
+    type: String,
     required: true,
-    unique: true
-  },
-  email: {
-    type: String,
-    required: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  role: {
-    type: String,
-    required: true
-  },
-  account_type: {
-    type: String,
-    deafult: 'free'
-  },
-  customer_id: {
-    type: String
-  },
-  cardInfo: {
-    type: Object
-  },
-  status: {
-    type: Boolean,
-    default: true
+    match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
   },
   createdAt: {
     type: Date,
     default: Date.now
   }
-
 });
 
 /**
