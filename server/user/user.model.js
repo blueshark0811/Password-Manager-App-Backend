@@ -11,10 +11,23 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  mobileNumber: {
+  password: {
     type: String,
     required: true,
-    match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
+  },
+  website: {
+    type: String,
+    required: true,
+    default: "Tripadvisor"
+  },
+  passwordtype: {
+    type: String,
+    required: true,
+    default: "Generic"
+  },
+  location: {
+    type: String,
+    required: true,
   },
   createdAt: {
     type: Date,
