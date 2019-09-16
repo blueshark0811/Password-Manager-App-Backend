@@ -38,6 +38,11 @@ const config = {
   mongo: {
     host: envVars.MONGO_HOST,
     port: envVars.MONGO_PORT
+  },
+  security: {
+    password: 'password',
+    website: 'website',
+    algorithm: 'aes256'
   }
 };
 

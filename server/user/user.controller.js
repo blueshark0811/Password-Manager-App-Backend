@@ -1,5 +1,6 @@
 const User = require('./user.model');
-
+var crypto = require('crypto');
+const config = require('../../config/config')
 /**
  * Load user and append to req.
  */
@@ -27,16 +28,28 @@ function get(req, res) {
  * @returns {User}
  */
 function create(req, res, next) {
+  var algorithm = config.security.algorithm;
+  var key = config.security.password;
+  var text = req.body.password;
+
+  var cipher = crypto.createCipher(algorithm, key);  
+  var cipher1 = crypto.createCipher(algorithm, key)
+
   const user = new User({
     username: req.body.username,
-    password: req.body.password,
+    password: cipher.update(req.body.password, 'utf8', 'hex') + cipher.final('hex'),
     passwordtype: req.body.passwordtype,
-    website: req.body.website,
+    website: cipher1.update(req.body.website, 'utf8', 'hex') + cipher1.final('hex'),
     location: req.body.location
   });
 
   user.save()
-    .then(savedUser => res.json(savedUser))
+    .then(savedUser => {
+      let tmp = savedUser;
+      tmp.password = req.body.password;
+      tmp.password= req.body.website;
+      return res.json(tmp)
+    })
     .catch(e => next(e));
 }
 
@@ -47,14 +60,24 @@ function create(req, res, next) {
  * @returns {User}
  */
 function update(req, res, next) {
+  var algorithm = config.security.algorithm;
+  var key = config.security.password;
+
+  var cipher = crypto.createCipher(algorithm, key);  
+  var cipher1 = crypto.createCipher(algorithm, key)
   const user = req.user;
   user.username = req.body.username;
-  user.password = req.body.password;
+  user.password = cipher.update(req.body.password, 'utf8', 'hex') + cipher.final('hex');
   user.passwordtype = req.body.passwordtype;
-  user.website = req.body.website;
+  user.website = cipher1.update(req.body.website, 'utf8', 'hex') + cipher1.final('hex');
   user.location = req.body.location;
   user.save()
-    .then(savedUser => res.json(savedUser))
+    .then(savedUser => {
+      let tmp = savedUser;
+      tmp.password = req.body.password;
+      tmp.website= req.body.website;
+      return res.json(tmp)
+    })
     .catch(e => next(e));
 }
 
@@ -65,9 +88,22 @@ function update(req, res, next) {
  * @returns {User[]}
  */
 function list(req, res, next) {
+  var algorithm = config.security.algorithm;
+  var key = config.security.password;
   const { limit = 50, skip = 0 } = req.query;
   User.list({ limit, skip })
-    .then(users => res.json(users))
+    .then(users => {
+      var decryptedlist = []
+      for(let index in users) {
+        var decipher = crypto.createDecipher(algorithm, key);
+        var decipher1 = crypto.createDecipher(algorithm, key);
+        let tmp = users[index];
+        tmp.password = decipher.update(tmp.password, 'hex', 'utf8') + decipher.final('utf8');
+        tmp.website = decipher1.update(tmp.website, 'hex', 'utf8') + decipher1.final('utf8');
+        decryptedlist.push(tmp);
+      }
+      return res.json(decryptedlist); 
+    })
     .catch(e => next(e));
 }
 
