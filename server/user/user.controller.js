@@ -1,4 +1,6 @@
 const User = require('./user.model');
+const Pin = require('./pin.model');
+
 var crypto = require('crypto');
 const config = require('../../config/config')
 /**
@@ -52,6 +54,33 @@ function create(req, res, next) {
     })
     .catch(e => next(e));
 }
+function getPin(req, res, next) {
+  Pin.findOne({username: 'admin'})
+    .then((pin) => res.json(pin))
+    .catch(e => next(e));
+}
+function createPin(req, res, next) {
+  const pin = new Pin({
+    username: req.body.username,
+    pin: req.body.pin
+  });
+  Pin.remove({}).then(removed => {
+    pin.save()
+    .then(savedPin => res.json(savedPin) )
+    .catch(e => next(e));
+  })
+  .catch(e => next(e));
+}
+function updatePin(req, res, next) {
+  Pin.findOne({username: req.body.username}).then((pin) => {
+    const newPin = pin;
+    newPin.pin = req.body.pin;
+    newPin.save()
+    .then(savedPin => res.json(savedPin) )
+    .catch(e => next(e));
+  }).catch(e => next(e));
+}
+
 
 /**
  * Update existing user
@@ -118,4 +147,4 @@ function remove(req, res, next) {
     .catch(e => next(e));
 }
 
-module.exports = { load, get, create, update, list, remove };
+module.exports = { load, get, createPin, updatePin, getPin, create, update, list, remove };

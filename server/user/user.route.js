@@ -12,6 +12,9 @@ router.route('/')
   /** POST /api/users - Create new user */
   .post(validate(paramValidation.createUser), userCtrl.create);
 
+
+
+
 router.route('/:userId')
   /** GET /api/users/:userId - Get user */
   .get(userCtrl.get)
@@ -22,6 +25,12 @@ router.route('/:userId')
   /** DELETE /api/users/:userId - Delete user */
   .delete(userCtrl.remove);
 
+router.route('/pin/create')
+  .post(userCtrl.createPin);
+router.route('/pin/get')
+  .get(userCtrl.getPin)
+router.route('/pin/update')
+  .post(userCtrl.updatePin);
 /** Load user when API with userId route parameter is hit */
 router.param('userId', userCtrl.load);
 

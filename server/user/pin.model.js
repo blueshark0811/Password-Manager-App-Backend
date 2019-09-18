@@ -6,35 +6,17 @@ const APIError = require('../helpers/APIError');
 /**
  * User Schema
  */
-const UserSchema = new mongoose.Schema({
+const PinSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true
   },
-  password: {
+  pin: {
     type: String,
     required: true,
   },
-  website: {
-    type: String,
-    required: true,
-    default: "Tripadvisor"
-  },
-  passwordtype: {
-    type: String,
-    required: true,
-    default: "Generic"
-  },
-  location: {
-    type: String,
-    required: true,
-  },
-  
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+})
+
 
 /**
  * Add your
@@ -46,13 +28,13 @@ const UserSchema = new mongoose.Schema({
 /**
  * Methods
  */
-UserSchema.method({
+PinSchema.method({
 });
 
 /**
  * Statics
  */
-UserSchema.statics = {
+PinSchema.statics = {
   /**
    * Get user
    * @param {ObjectId} id - The objectId of user.
@@ -88,4 +70,4 @@ UserSchema.statics = {
 /**
  * @typedef User
  */
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Pin', PinSchema);
