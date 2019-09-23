@@ -9,27 +9,41 @@ const APIError = require('../helpers/APIError');
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true
   },
   password: {
     type: String,
-    required: true,
+    default: ''
   },
   website: {
     type: String,
-    required: true,
-    default: "Tripadvisor"
+    default: ""
   },
   passwordtype: {
     type: String,
-    required: true,
     default: "Generic"
   },
   location: {
     type: String,
-    required: true,
   },
-  
+  google: {
+    type: String
+  },
+  facebook: {
+    type: String
+  },
+  profile: {
+    type: Object,
+    default: {}
+  },
+  email: {
+    type: Object
+  },
+  picture: {
+    type: Object
+  },
+  tokens: {
+    type: Array
+  },
   createdAt: {
     type: Date,
     default: Date.now

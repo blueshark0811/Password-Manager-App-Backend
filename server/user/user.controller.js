@@ -80,7 +80,11 @@ function updatePin(req, res, next) {
     .catch(e => next(e));
   }).catch(e => next(e));
 }
-
+function resetPin(req, res, next) {
+  Pin.remove({})
+  .then(removed => res.json(removed))
+  .catch(e => next(e));
+}
 
 /**
  * Update existing user
@@ -126,16 +130,46 @@ function list(req, res, next) {
       for(let index in users) {
         var decipher = crypto.createDecipher(algorithm, key);
         var decipher1 = crypto.createDecipher(algorithm, key);
-        let tmp = users[index];
-        tmp.password = decipher.update(tmp.password, 'hex', 'utf8') + decipher.final('utf8');
-        tmp.website = decipher1.update(tmp.website, 'hex', 'utf8') + decipher1.final('utf8');
+        let tmp = {
+          username: users[index].username,
+          password: users[index].password,
+          website: users[index].website,
+          passwordtype: users[index].passwordtype,
+          location: users[index].location
+        };
+        if(tmp.passwordtype == 'Generic') {
+          tmp.password = decipher.update(tmp.password, 'hex', 'utf8') + decipher.final('utf8');
+          tmp.website = decipher1.update(tmp.website, 'hex', 'utf8') + decipher1.final('utf8');
+        }
         decryptedlist.push(tmp);
       }
       return res.json(decryptedlist); 
     })
     .catch(e => next(e));
 }
-
+function getPassword(req, res, next) {
+  console.log(req.params)
+  
+  Pin.findOne({username: 'admin'})
+    .then((pin) => {
+      if(pin.pin == req.params.pin) {
+        console.log('11111111111111111111111111111111111111111111111', req.params);
+        User.findOne({username: req.params.user, passwordtype: req.params.passwordtype})
+          .then(user => {
+            var algorithm = config.security.algorithm;
+            var key = config.security.password;
+            var decipher = crypto.createDecipher(algorithm, key);
+            let password = decipher.update(user.password, 'hex', 'utf8') + decipher.final('utf8');
+            res.json({username: user.username, password: password});
+          })
+          .catch(e => next(e));
+      }
+      else
+        res.json({'error': 'incorrect pin'})
+    })
+    .catch(e => next(e));
+  
+}
 /**
  * Delete user.
  * @returns {User}
@@ -147,4 +181,4 @@ function remove(req, res, next) {
     .catch(e => next(e));
 }
 
-module.exports = { load, get, createPin, updatePin, getPin, create, update, list, remove };
+module.exports = { load, get, createPin, getPassword, updatePin, resetPin, getPin, create, update, list, remove };

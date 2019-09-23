@@ -31,7 +31,14 @@ router.route('/pin/get')
   .get(userCtrl.getPin)
 router.route('/pin/update')
   .post(userCtrl.updatePin);
+router.route('/pin/reset')
+  .delete(userCtrl.resetPin);
 /** Load user when API with userId route parameter is hit */
+
+router.route('/credential/:pin/:user/:passwordtype')
+  /** GET /api/users - Get list of users */
+  .get(userCtrl.getPassword)
+
 router.param('userId', userCtrl.load);
 
 module.exports = router;

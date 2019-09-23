@@ -13,6 +13,9 @@ const winstonInstance = require('./winston');
 const routes = require('../index.route');
 const config = require('./config');
 const APIError = require('../server/helpers/APIError');
+const passport = require('passport');
+
+const passportConfig = require('./passport');
 
 const app = express();
 
@@ -28,6 +31,8 @@ app.use(cookieParser());
 app.use(compress());
 app.use(methodOverride());
 
+app.use(passport.initialize());
+app.use(passport.session());
 // secure apps by setting various HTTP headers
 app.use(helmet());
 
@@ -46,9 +51,18 @@ if (config.env === 'development') {
   }));
 }
 
-// mount all routes on /api path
-app.use('/api', routes);
+var redirectUrl = process.env.NODE_ENV == 'development' ? 'http://localhost:3008/' : 'http://45.63.27.167'
 
+app.use('/api', routes);
+app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'public_profile'] }));
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: redirectUrl }), (req, res) => {
+  res.redirect(redirectUrl);
+  // res.redirect(req.session.returnTo || '/');
+});
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets.readonly'], accessType: 'offline', prompt: 'consent' }));
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+  res.redirect(req.session.returnTo || '/');
+});
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
   if (err instanceof expressValidation.ValidationError) {
