@@ -127,8 +127,10 @@ const googleStrategyConfig = new GoogleStrategy({
   callbackURL: '/auth/google/callback',
   passReqToCallback: true
 }, (req, accessToken, refreshToken, params, profile, done) => {
+    console.log('3333333333333333333', profile)
     if (req.user) {
     User.findOne({ google: profile.id }, (err, existingUser) => {
+      console.log('444444444444', existingUser)
       if (err) { return done(err); }
       if (existingUser) {
         req.flash('errors', { msg: 'There is already a Google account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
@@ -141,14 +143,16 @@ const googleStrategyConfig = new GoogleStrategy({
           user.profile.name = user.profile.name || `${profile.name.givenName} ${profile.name.familyName}`;
           user.profile.picture = user.profile.picture;
           user.save((err) => {
-            req.flash('info', { msg: 'Google account has been linked.' });
+            // req.flash('info', { msg: 'Google account has been linked.' });
             done(err, user);
           });
         });
       }
     });
   } else {
-    User.findOne({ facebook: profile.id }, (err, existingUser) => {
+    User.findOne({ google: profile.id }, (err, existingUser) => {
+      console.log('55555', existingUser)
+
       if (err) { return done(err); }
       if (existingUser) {
         return done(null, existingUser);
@@ -156,7 +160,7 @@ const googleStrategyConfig = new GoogleStrategy({
       User.findOne({ email: profile._json.email }, (err, existingEmailUser) => {
         if (err) { return done(err); }
         if (existingEmailUser) {
-          req.flash('errors', { msg: 'There is already an account using this email address. Please sign in with that account or reset your password.' });
+          // req.flash('errors', { msg: 'There is already an account using this email address. Please sign in with that account or reset your password.' });
           done(err);
         } else {
           const user = new User();
@@ -175,18 +179,18 @@ const googleStrategyConfig = new GoogleStrategy({
     });
   }
 });
-// passport.use('google', googleStrategyConfig);
-// refresh.use('google', googleStrategyConfig);
+passport.use('google', googleStrategyConfig);
+refresh.use('google', googleStrategyConfig);
 
 /**
  * Login Required middleware.
  */
-exports.isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/login');
-};
+// exports.isAuthenticated = (req, res, next) => {
+//   if (req.isAuthenticated()) {
+//     return next();
+//   }
+//   res.redirect('/login');
+// };
 
 /**
  * Authorization Required middleware.
