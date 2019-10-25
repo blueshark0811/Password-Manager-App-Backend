@@ -20,7 +20,9 @@ function load(req, res, next, id) {
  * @returns {User}
  */
 function get(req, res) {
-  if(req.user.userid == req.headers['x-user-id'] || !req.user.userid || req.user.userid == '')
+  if(!req.headers['x-user-id'])
+    res.json({'error': 'unauthorized error'});
+  if(req.user.userid == req.headers['x-user-id'])
     return res.json(req.user);
   else
     res.json({'error': 'unauthorized error'});
@@ -33,13 +35,14 @@ function get(req, res) {
  * @returns {User}
  */
 function create(req, res, next) {
+  if(!req.headers['x-user-id'])
+    res.json({'error': 'unauthorized error'});
   var algorithm = config.security.algorithm;
   var key = config.security.password;
   var text = req.body.password;
 
   var cipher = crypto.createCipher(algorithm, key);  
   var cipher1 = crypto.createCipher(algorithm, key)
-  console.log('333333333333333333333333333', req.body)
   const user = new User({
     username: req.body.username,
     password: cipher.update(req.body.password, 'utf8', 'hex') + cipher.final('hex'),
@@ -97,6 +100,8 @@ function resetPin(req, res, next) {
  * @returns {User}
  */
 function update(req, res, next) {
+  if(!req.headers['x-user-id'])
+    res.json({'error': 'unauthorized error'});
   var algorithm = config.security.algorithm;
   var key = config.security.password;
 
@@ -128,10 +133,12 @@ function update(req, res, next) {
  * @returns {User[]}
  */
 function list(req, res, next) {
+  if(!req.headers['x-user-id'])
+    res.json({'error': 'unauthorized error'});
   var algorithm = config.security.algorithm;
   var key = config.security.password;
   const { limit = 50, skip = 0 } = req.query;
-  User.list({ limit, skip })
+  User.list({ userid: req.headers['x-user-id'], limit, skip })
     .then(users => {
       var decryptedlist = []
       for(let index in users) {
