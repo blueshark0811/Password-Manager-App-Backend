@@ -59,9 +59,9 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
   res.redirect(redirectUrl);
   // res.redirect(req.session.returnTo || '/');
 });
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets.readonly'], accessType: 'offline', prompt: 'consent' }));
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile'], accessType: 'offline', prompt: 'consent' }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-  res.redirect(req.session.returnTo || '/');
+  res.redirect(redirectUrl);
 });
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {

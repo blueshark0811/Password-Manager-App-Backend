@@ -34,7 +34,7 @@ router.route('/pin/update')
 router.route('/pin/reset')
   .delete(userCtrl.resetPin);
 /** Load user when API with userId route parameter is hit */
-
+// http://45.63.27.167:4040/api/users/credential/ABCD/test/Tripadvisor
 router.route('/credential/:pin/:user/:passwordtype')
   /** GET /api/users - Get list of users */
   .get(userCtrl.getPassword)
@@ -42,3 +42,4 @@ router.route('/credential/:pin/:user/:passwordtype')
 router.param('userId', userCtrl.load);
 
 module.exports = router;
+// http://localhost:4040/api/users/credential/ABCD/test/Tripadvisor

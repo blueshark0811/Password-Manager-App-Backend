@@ -20,7 +20,10 @@ function load(req, res, next, id) {
  * @returns {User}
  */
 function get(req, res) {
-  return res.json(req.user);
+  if(req.user.userid == req.headers['x-user-id'] || !req.user.userid || req.user.userid == '')
+    return res.json(req.user);
+  else
+    res.json({'error': 'unauthorized error'});
 }
 
 /**
@@ -36,13 +39,14 @@ function create(req, res, next) {
 
   var cipher = crypto.createCipher(algorithm, key);  
   var cipher1 = crypto.createCipher(algorithm, key)
-
+  console.log('333333333333333333333333333', req.body)
   const user = new User({
     username: req.body.username,
     password: cipher.update(req.body.password, 'utf8', 'hex') + cipher.final('hex'),
     passwordtype: req.body.passwordtype,
     website: cipher1.update(req.body.website, 'utf8', 'hex') + cipher1.final('hex'),
-    location: req.body.location
+    location: req.body.location,
+    userid: req.headers['x-user-id'] || ''
   });
 
   user.save()
@@ -104,14 +108,17 @@ function update(req, res, next) {
   user.passwordtype = req.body.passwordtype;
   user.website = cipher1.update(req.body.website, 'utf8', 'hex') + cipher1.final('hex');
   user.location = req.body.location;
-  user.save()
-    .then(savedUser => {
-      let tmp = savedUser;
-      tmp.password = req.body.password;
-      tmp.website= req.body.website;
-      return res.json(tmp)
-    })
-    .catch(e => next(e));
+  if(req.user.userid == req.headers['x-user-id'] || !req.user.userid || req.user.userid == '')
+    user.save()
+      .then(savedUser => {
+        let tmp = savedUser;
+        tmp.password = req.body.password;
+        tmp.website= req.body.website;
+        return res.json(tmp)
+      })
+      .catch(e => next(e));
+  else
+    res.json({'error': 'unauthorized error'});
 }
 
 /**
@@ -131,11 +138,13 @@ function list(req, res, next) {
         var decipher = crypto.createDecipher(algorithm, key);
         var decipher1 = crypto.createDecipher(algorithm, key);
         let tmp = {
+          _id: users[index]._id,
           username: users[index].username,
           password: users[index].password,
           website: users[index].website,
           passwordtype: users[index].passwordtype,
-          location: users[index].location
+          location: users[index].location,
+          userid: users[index].userid
         };
         if(tmp.passwordtype == 'Generic') {
           tmp.password = decipher.update(tmp.password, 'hex', 'utf8') + decipher.final('utf8');
@@ -153,7 +162,7 @@ function getPassword(req, res, next) {
   Pin.findOne({username: 'admin'})
     .then((pin) => {
       if(pin.pin == req.params.pin) {
-        console.log('11111111111111111111111111111111111111111111111', req.params);
+        console.log(req.headers['x-user-id']);
         User.findOne({username: req.params.user, passwordtype: req.params.passwordtype})
           .then(user => {
             var algorithm = config.security.algorithm;
@@ -176,9 +185,13 @@ function getPassword(req, res, next) {
  */
 function remove(req, res, next) {
   const user = req.user;
-  user.remove()
+  if(req.user.userid == req.headers['x-user-id'] || !req.user.userid || req.user.userid == '')
+    user.remove()
     .then(deletedUser => res.json(deletedUser))
     .catch(e => next(e));
+  else
+    res.json({'error': 'unauthorized error'});
+  
 }
 
 module.exports = { load, get, createPin, getPassword, updatePin, resetPin, getPin, create, update, list, remove };
