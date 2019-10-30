@@ -52,17 +52,17 @@ if (config.env === 'development') {
 }
 
 var redirectUrl = process.env.NODE_ENV == 'development' ? 'http://localhost:3008/' : 'http://45.63.27.167'
-
-app.use('/api', routes);
-app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'public_profile'] }));
-app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: redirectUrl }), (req, res) => {
+app.get('/api/users/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'public_profile'] }));
+app.get('/api/users/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: redirectUrl }), (req, res) => {
   res.redirect(redirectUrl);
   // res.redirect(req.session.returnTo || '/');
 });
-app.get('/auth/google', passport.authenticate('google', { scope: ['email', 'profile'], accessType: 'offline', prompt: 'consent' }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: redirectUrl }), (req, res) => {
+app.get('/api/users/auth/google', passport.authenticate('google', { scope: ['profile'], accessType: 'offline', prompt: 'consent' }));
+app.get('/api/users/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
   res.redirect(redirectUrl);
 });
+app.use('/api', routes);
+
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
   if (err instanceof expressValidation.ValidationError) {
